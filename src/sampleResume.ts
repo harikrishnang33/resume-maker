@@ -199,7 +199,7 @@ const header: ResumeNode = {
 export const sampleResume: ResumeDoc = {
   schema: SCHEMA_VERSION,
   page: { size: 'A4', marginMm: 12 },
-  type: { baseSizePt: 10, lineHeight: 1.24 },
+  type: { baseSizePt: 10, lineHeight: 1.2, fontFamily: 'Charter' },
   spacing: { ...DEFAULT_SPACING },
   root: {
     id: 'root',

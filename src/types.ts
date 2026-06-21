@@ -76,6 +76,8 @@ export interface ResumeDoc {
     baseSizePt: number;
     /** unitless line height */
     lineHeight: number;
+    /** font family key (see src/pdf/fonts.ts); defaults to Charter */
+    fontFamily?: string;
   };
   /** Vertical separation between blocks, in em (relative to base font size). */
   spacing: {
@@ -89,6 +91,6 @@ export interface ResumeDoc {
   root: ResumeNode;
 }
 
-export const DEFAULT_SPACING = { section: 0.7, subsection: 0.4, bullet: 0.1 };
+export const DEFAULT_SPACING = { section: 0.6, subsection: 0.4, bullet: 0.1 };
 
 export const SCHEMA_VERSION = 1;

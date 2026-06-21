@@ -1,98 +1,63 @@
-import { useLayoutEffect, useRef, useState } from 'react';
+import { createElement, useEffect, useRef, useState } from 'react';
 import { useStore } from '../store';
-import { NodeView } from './PreviewNode';
 import styles from './Preview.module.css';
 
-const PAGE_DIMS = {
-  A4: { w: 210, h: 297 },
-  Letter: { w: 216, h: 279 },
-};
-
-// CSS px per mm (absolute unit: 96px / 25.4mm). Independent of any transform.
-const MM = 96 / 25.4;
-
+/**
+ * The preview IS the PDF: we render the exact same react-pdf document that the
+ * Download button produces and show it in an embedded viewer. That guarantees
+ * the preview and the downloaded file are byte-for-byte identical — same fonts,
+ * layout, and page breaks — on every device. Regeneration is debounced and the
+ * previous render stays visible until the new one is ready (no blank flash).
+ */
 export function Preview() {
-  const { doc, setSelectedId } = useStore();
-  const dims = PAGE_DIMS[doc.page.size];
-  const canvasRef = useRef<HTMLDivElement>(null);
-  const pageRef = useRef<HTMLDivElement>(null);
-  const contentRef = useRef<HTMLDivElement>(null);
-  // y-offsets (CSS px, unscaled) where each printed page ends
-  const [breaks, setBreaks] = useState<number[]>([]);
-  // fit-to-width scale (≤ 1) so the A4 sheet never overflows the canvas
-  const [scale, setScale] = useState(1);
-  const [naturalH, setNaturalH] = useState(dims.h * MM);
+  const { doc } = useStore();
+  const [url, setUrl] = useState<string | null>(null);
+  const [busy, setBusy] = useState(true);
+  const [err, setErr] = useState<string | null>(null);
+  const urlRef = useRef<string | null>(null);
+  const genRef = useRef(0);
 
-  const pageWpx = dims.w * MM;
-
-  const pageStyle = {
-    '--page-w': `${dims.w}mm`,
-    '--page-min-h': `${dims.h}mm`,
-    '--page-margin': `${doc.page.marginMm}mm`,
-    '--base-size': `${doc.type.baseSizePt}pt`,
-    '--line-height': `${doc.type.lineHeight}`,
-    '--space-section': `${doc.spacing.section}em`,
-    '--space-subsection': `${doc.spacing.subsection}em`,
-    '--space-bullet': `${doc.spacing.bullet}em`,
-    transform: `scale(${scale})`,
-    transformOrigin: 'top left',
-  } as React.CSSProperties;
-
-  // Measure (in unscaled CSS px, via offsetHeight + the constant mm→px factor,
-  // so the transform never skews it): page-break guides + the fit-to-width scale.
-  useLayoutEffect(() => {
-    const canvas = canvasRef.current;
-    const page = pageRef.current;
-    const content = contentRef.current;
-    if (!canvas || !page || !content) return;
-    const recompute = () => {
-      const pad = parseFloat(getComputedStyle(canvas).paddingLeft) || 0;
-      const avail = canvas.clientWidth - 2 * pad;
-      setScale(avail > 0 ? Math.min(1, avail / pageWpx) : 1);
-      setNaturalH(page.offsetHeight);
-
-      const printableMm = dims.h - 2 * doc.page.marginMm;
-      if (printableMm <= 0) return setBreaks([]);
-      const contentMm = content.offsetHeight / MM;
-      const lines: number[] = [];
-      for (let k = 1; k * printableMm < contentMm - 0.5; k++) {
-        lines.push((doc.page.marginMm + k * printableMm) * MM);
+  useEffect(() => {
+    const handle = setTimeout(async () => {
+      const id = ++genRef.current;
+      setBusy(true);
+      try {
+        const [{ pdf }, { ResumePdf }, { registerPdfFonts }] = await Promise.all([
+          import('@react-pdf/renderer'),
+          import('../pdf/ResumePdf'),
+          import('../pdf/registerFonts'),
+        ]);
+        registerPdfFonts();
+        const element = createElement(ResumePdf, { doc }) as Parameters<typeof pdf>[0];
+        const blob = await pdf(element).toBlob();
+        if (id !== genRef.current) return; // a newer edit superseded this one
+        const next = URL.createObjectURL(blob);
+        if (urlRef.current) URL.revokeObjectURL(urlRef.current);
+        urlRef.current = next;
+        setUrl(next);
+        setErr(null);
+      } catch (e) {
+        if (id === genRef.current) setErr((e as Error).message);
+      } finally {
+        if (id === genRef.current) setBusy(false);
       }
-      setBreaks(lines);
-    };
-    recompute();
-    const ro = new ResizeObserver(recompute);
-    ro.observe(content);
-    ro.observe(canvas);
-    return () => ro.disconnect();
-  }, [doc, dims.w, dims.h, pageWpx]);
+    }, 450);
+    return () => clearTimeout(handle);
+  }, [doc]);
 
-  const pageCount = breaks.length + 1;
+  // revoke the last object URL on unmount
+  useEffect(() => () => { if (urlRef.current) URL.revokeObjectURL(urlRef.current); }, []);
 
   return (
-    <div ref={canvasRef} className={styles.canvas} onClick={() => setSelectedId(null)}>
-      <div className={`${styles.pageBadge} no-print ${pageCount > 1 ? styles.pageBadgeWarn : ''}`}>
-        {pageCount === 1 ? '1 page' : `${pageCount} pages`}
-      </div>
-      {/* the scaler reserves only the SCALED footprint, so the canvas never
-          scrolls horizontally and the grey margin stays minimal */}
-      <div
-        className={styles.scaler}
-        style={{ width: `${pageWpx * scale}px`, height: `${naturalH * scale}px` }}
-      >
-        <div ref={pageRef} className={`${styles.page} ${styles.rendered}`} id="resume-page" style={pageStyle}>
-          <div ref={contentRef}>
-            {(doc.root.children ?? []).map((node) => (
-              <NodeView node={node} key={node.id} />
-            ))}
-          </div>
-          {breaks.map((top, i) => (
-            <div key={i} className={`${styles.pageBreak} no-print`} style={{ top }}>
-              <span>page {i + 2}</span>
-            </div>
-          ))}
-        </div>
-      </div>
+    <div className={styles.canvas}>
+      {busy && <div className={`${styles.badge} no-print`}>Updating…</div>}
+      {err ? (
+        <div className={styles.message}>Couldn’t render the preview: {err}</div>
+      ) : url ? (
+        <iframe title="Resume preview" src={`${url}#toolbar=0&navpanes=0&view=FitH`} className={styles.frame} />
+      ) : (
+        <div className={styles.message}>Rendering preview…</div>
+      )}
     </div>
   );
 }

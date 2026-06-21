@@ -3,6 +3,8 @@ import { DEFAULT_SPACING, SCHEMA_VERSION } from '../types';
 import { newId } from './tree';
 import { sanitizeRich, richToPlain } from './richtext';
 
+const ALLOWED_FONTS = new Set(['Charter', 'Times', 'Helvetica']);
+
 const VALID_TYPES: NodeType[] = [
   'document',
   'header',
@@ -91,7 +93,8 @@ export function parseDoc(json: string): ResumeDoc {
     },
     type: {
       baseSizePt: clampNum(type.baseSizePt, 8, 13, 10),
-      lineHeight: clampNum(type.lineHeight, 1, 1.8, 1.24),
+      lineHeight: clampNum(type.lineHeight, 1, 1.8, 1.2),
+      fontFamily: ALLOWED_FONTS.has(String(type.fontFamily)) ? String(type.fontFamily) : 'Charter',
     },
     spacing: {
       section: clampNum(spacing.section, 0, 3, DEFAULT_SPACING.section),

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useStore } from '../store';
 import { sampleResume } from '../sampleResume';
 import { exportJson, downloadText, readFileText, parseDoc } from '../utils/io';
+import { FONT_OPTIONS } from '../pdf/fonts';
 import styles from './Toolbar.module.css';
 
 export function Toolbar() {
@@ -9,6 +10,7 @@ export function Toolbar() {
   const fileRef = useRef<HTMLInputElement>(null);
   const layoutRef = useRef<HTMLDivElement>(null);
   const [layoutOpen, setLayoutOpen] = useState(false);
+  const [generating, setGenerating] = useState(false);
 
   // close the Layout dropdown on outside click / Escape
   useEffect(() => {
@@ -48,6 +50,19 @@ export function Toolbar() {
     if (window.confirm('Reset to the seeded resume? This replaces the current content.')) {
       dispatch({ kind: 'setDoc', doc: parseDoc(JSON.stringify(sampleResume)) });
       setSelectedId(null);
+    }
+  };
+
+  const onDownloadPdf = async () => {
+    setGenerating(true);
+    try {
+      // dynamic import keeps the heavy PDF renderer out of the initial bundle
+      const { downloadResumePdf } = await import('../pdf/download');
+      await downloadResumePdf(doc, nameFromDoc(doc) || 'resume');
+    } catch (err) {
+      window.alert(`Could not generate PDF: ${(err as Error).message}`);
+    } finally {
+      setGenerating(false);
     }
   };
 
@@ -116,6 +131,19 @@ export function Toolbar() {
                 <span className={styles.menuHead}>Type</span>
                 <label className={styles.menuField}>
                   <span>Font</span>
+                  <select
+                    value={doc.type.fontFamily ?? 'Charter'}
+                    onChange={(e) => dispatch({ kind: 'setType', patch: { fontFamily: e.target.value } })}
+                  >
+                    {FONT_OPTIONS.map((f) => (
+                      <option key={f.key} value={f.key}>
+                        {f.label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label className={styles.menuField}>
+                  <span>Size</span>
                   <span className={styles.inputUnit}>
                     <input
                       type="number"
@@ -203,8 +231,8 @@ export function Toolbar() {
         <button className={styles.ghost} onClick={onReset} disabled={locked}>
           Reset
         </button>
-        <button className={styles.primary} onClick={() => window.print()}>
-          ⎙ Download PDF
+        <button className={styles.primary} onClick={onDownloadPdf} disabled={generating}>
+          {generating ? '… Generating' : '⬇ Download PDF'}
         </button>
       </div>
     </header>
