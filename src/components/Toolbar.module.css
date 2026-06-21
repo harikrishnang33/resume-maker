@@ -1,0 +1,120 @@
+.bar {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  flex-wrap: wrap;
+  padding: 8px 16px;
+  background: #1f2430;
+  color: #e8ebf2;
+  border-bottom: 1px solid #11151d;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  font-size: 15px;
+  margin-right: 4px;
+}
+.logo {
+  font-size: 18px;
+  color: #8fb0ff;
+}
+
+.group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.groupLabel {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #7c869c;
+}
+
+.btn,
+.ghost,
+.primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: none;
+  border-radius: 7px;
+  padding: 7px 12px;
+  font-size: 13px;
+  cursor: pointer;
+}
+.btn {
+  background: #2d3445;
+  color: #dde2ee;
+}
+.btn:hover {
+  background: #3a4256;
+}
+.ghost {
+  background: transparent;
+  color: #aab2c2;
+}
+.ghost:hover {
+  background: #2d3445;
+}
+.primary {
+  background: #4f7cff;
+  color: #fff;
+  font-weight: 600;
+}
+.primary:hover {
+  background: #3f6bef;
+}
+
+.field {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  color: #aab2c2;
+}
+.field select,
+.field input {
+  background: #2d3445;
+  color: #e8ebf2;
+  border: 1px solid #3a4256;
+  border-radius: 5px;
+  padding: 4px 6px;
+  font-size: 12px;
+}
+.field input {
+  width: 54px;
+}
+
+/* Lock button — amber so it's clearly visible/distinct on the dark bar */
+.lockBtn,
+.lockBtnActive {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 7px;
+  padding: 7px 12px;
+  font-size: 13px;
+  cursor: pointer;
+}
+.lockBtn {
+  background: transparent;
+  color: #f0c674;
+  border: 1px solid #6b5a2e;
+}
+.lockBtn:hover {
+  background: rgba(240, 198, 116, 0.14);
+}
+.lockBtnActive {
+  background: #e0a93c;
+  color: #1f2430;
+  border: 1px solid #e0a93c;
+  font-weight: 700;
+}
+.lockBtnActive:hover {
+  background: #d49b2c;
+}

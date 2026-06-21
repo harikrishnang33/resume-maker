@@ -1,0 +1,337 @@
+/* ===========================================================================
+   The resume page. Screen shows it on a grey canvas as a white "sheet" with a
+   shadow; print emits exactly the sheet at the chosen page size.
+   =========================================================================== */
+
+.canvas {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  overflow: auto;
+  background: #6b7280;
+  padding: 28px;
+  display: flex;
+  /* "safe" so a too-narrow canvas scrolls to the sheet instead of clipping it */
+  justify-content: safe center;
+  align-items: flex-start;
+}
+
+/* page-count badge (screen only) */
+.pageBadge {
+  position: sticky;
+  top: 0;
+  align-self: flex-start;
+  margin-right: -8px;
+  z-index: 5;
+  font-size: 11px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color: #cfd6e4;
+  background: rgba(31, 36, 48, 0.9);
+  padding: 4px 9px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.pageBadgeWarn {
+  color: #fff;
+  background: #c2693f;
+}
+
+.page {
+  position: relative;
+  width: var(--page-w);
+  /* never let the flex canvas shrink the sheet below its real A4 width —
+     otherwise the content reflows narrower/taller and the page-count math
+     falsely reports an extra page when the window narrows (e.g. a sidebar). */
+  flex-shrink: 0;
+  min-height: var(--page-min-h);
+  padding: var(--page-margin);
+  background: #fff;
+  color: #000;
+  box-shadow: 0 6px 28px rgba(0, 0, 0, 0.32);
+  box-sizing: border-box;
+
+  /* Bitstream Charter — the exact face the original Overleaf PDF used. */
+  font-family: 'Charter', 'Bitstream Charter', 'XCharter', 'Georgia', 'Cambria', 'Times New Roman', serif;
+  font-size: var(--base-size);
+  line-height: var(--line-height);
+  /* crisp, dark, kerned text to match a LaTeX render (no Mac smoothing that
+     thins serifs and reads as "dull") */
+  text-rendering: optimizeLegibility;
+  font-kerning: normal;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+
+/* --- header --------------------------------------------------------------- */
+.header {
+  text-align: center;
+  margin-bottom: 0.5em;
+}
+
+.name {
+  font-size: 2.4em;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  margin: 0 0 0.14em;
+  line-height: 1.05;
+}
+
+.contactRow {
+  font-size: 0.96em;
+  margin: 0.1em 0;
+}
+
+.contactWrap {
+  display: inline;
+}
+
+/* Draw a separator before every *visible* item that follows another visible
+   item. Hidden items (.whidden) are excluded, so no dangling separators. */
+.contactRow .contactWrap:not(.whidden) ~ .contactWrap:not(.whidden)::before {
+  content: '|';
+  margin: 0 0.55em;
+  color: #444;
+}
+
+.contactItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3em;
+  white-space: nowrap;
+}
+
+/* whole-chip link (icon + text); not underlined, to match the original */
+.contactLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3em;
+  color: inherit;
+  cursor: pointer;
+}
+.contactItem .contactLink {
+  text-decoration: none;
+}
+@media screen {
+  .contactItem .contactLink:hover {
+    text-decoration: underline;
+  }
+}
+
+.contactIcon {
+  font-size: 0.95em;
+  position: relative;
+  top: 0.06em;
+}
+
+.iconPicker {
+  font-size: 11px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  margin-right: 0.3em;
+  border: 1px solid #b9c0cc;
+  border-radius: 4px;
+  padding: 0 2px;
+  vertical-align: middle;
+}
+
+.summary {
+  text-align: justify;
+  margin: 0.7em 0 0;
+  font-size: 1em;
+}
+
+/* --- sections ------------------------------------------------------------- */
+.section {
+  margin-top: var(--space-section, 0.7em);
+}
+
+.sectionTitle {
+  font-size: 1.32em;
+  font-weight: 700;
+  margin: 0 0 0.08em;
+  line-height: 1.1;
+}
+
+.rule {
+  border: none;
+  border-top: 1px solid #111;
+  margin: 0 0 0.42em;
+}
+
+.sectionBody {
+  /* spacing handled by children */
+}
+
+/* --- subsections ---------------------------------------------------------- */
+.subsection {
+  margin: var(--space-subsection, 0.4em) 0 0.15em;
+}
+
+.subHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1em;
+}
+
+.subHeading {
+  font-size: 1em;
+  /* bold by default (like the section title) — no explicit <b> needed */
+  font-weight: 700;
+}
+
+.subDate {
+  font-size: 0.98em;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* --- bullets -------------------------------------------------------------- */
+.bullets {
+  margin: 0.15em 0 0;
+  padding-left: 1.25em;
+  list-style: disc;
+}
+
+.subBullets {
+  margin: 0.1em 0 0.1em;
+  padding-left: 1.25em;
+  list-style: circle;
+}
+
+.bullet {
+  margin: var(--space-bullet, 0.1em) 0;
+  padding-left: 0.1em;
+}
+
+.bullet::marker {
+  font-size: 0.85em;
+}
+
+.paragraph {
+  margin: 0.3em 0;
+}
+
+/* --- grid (technologies) -------------------------------------------------- */
+.grid {
+  display: grid;
+  gap: 0.18em 1.8em;
+  margin-top: 0.15em;
+}
+
+.gridItem {
+  font-size: 1em;
+  line-height: 1.45;
+}
+
+.gridLabel {
+  font-weight: 700;
+}
+
+.gridValue {
+  font-weight: 400;
+}
+
+/* --- inline rich-text content --------------------------------------------- */
+.page b,
+.page strong,
+.gridLabel {
+  font-weight: 700;
+}
+.page a {
+  color: inherit;
+  text-decoration: underline;
+}
+
+/* ===========================================================================
+   Editor affordances (screen only) — hidden nodes + selection highlight.
+   =========================================================================== */
+@media screen {
+  .hidden {
+    opacity: 0.34;
+    position: relative;
+  }
+  .selected {
+    outline: 2px solid rgba(70, 110, 220, 0.85);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+}
+
+/* page-break guide line — shows where the printed page ends (screen only) */
+.pageBreak {
+  position: absolute;
+  left: 0;
+  right: 0;
+  border-top: 1.5px dashed #c2693f;
+  pointer-events: none;
+  z-index: 3;
+}
+.pageBreak span {
+  position: absolute;
+  right: 6px;
+  top: 2px;
+  font-size: 9px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: #fff;
+  background: #c2693f;
+  padding: 1px 6px;
+  border-radius: 0 0 5px 5px;
+}
+
+/* Rendered (PDF-look) mode: on screen, show exactly what prints — hidden nodes
+   gone, no selection outline, no edit affordances. */
+.rendered .hidden,
+.rendered .whidden {
+  display: none !important;
+}
+.rendered .selected {
+  outline: none !important;
+}
+
+/* ===========================================================================
+   Print: emit only the sheet, edge to edge, no editor chrome, no hidden nodes.
+   =========================================================================== */
+@media print {
+  .canvas {
+    overflow: visible;
+    background: #fff;
+    padding: 0;
+    display: block;
+  }
+  .page {
+    /* the injected @page rule provides the physical margin on EVERY page
+       (incl. interior breaks), so drop the on-screen sheet's padding/width
+       and let content flow into the printable area */
+    box-shadow: none;
+    min-height: 0;
+    width: auto;
+    padding: 0;
+  }
+  .hidden,
+  .whidden {
+    display: none !important;
+  }
+  .selected {
+    outline: none !important;
+  }
+
+  /* keep entries, bullets and grid cells intact across page breaks */
+  .subsection,
+  .gridItem,
+  .bullet {
+    break-inside: avoid;
+  }
+  /* never strand a heading at the bottom of a page */
+  .sectionTitle,
+  .subHead {
+    break-after: avoid;
+  }
+  /* avoid single dangling lines of body text */
+  .summary,
+  .paragraph,
+  .bullets {
+    orphans: 2;
+    widows: 2;
+  }
+}

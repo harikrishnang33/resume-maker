@@ -1,0 +1,56 @@
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  color: #1f2430;
+  background: #6b7280;
+}
+
+button {
+  font-family: inherit;
+}
+
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.workspace {
+  flex: 1;
+  display: flex;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* ===========================================================================
+   Print: show only the resume sheet. The toolbar (.no-print) and outline panel
+   are removed; the workspace collapses so the page flows from the top-left.
+   =========================================================================== */
+@media print {
+  body {
+    background: #fff;
+  }
+  .no-print {
+    display: none !important;
+  }
+  .app,
+  .workspace {
+    display: block;
+    height: auto;
+    overflow: visible;
+  }
+  #resume-page {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}
