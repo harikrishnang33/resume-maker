@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useStore } from './store';
 import { Toolbar } from './components/Toolbar';
 import { OutlinePanel } from './components/OutlinePanel';
@@ -30,11 +30,36 @@ function PrintStyles() {
 }
 
 export function App() {
+  // On narrow screens, show one pane at a time via Edit/Preview tabs. Both stay
+  // mounted (CSS hides the inactive one) so printing always emits the resume.
+  const [narrow, setNarrow] = useState(
+    () => typeof window !== 'undefined' && window.matchMedia('(max-width: 1024px)').matches,
+  );
+  const [tab, setTab] = useState<'edit' | 'preview'>('edit');
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 1024px)');
+    const onChange = () => setNarrow(mq.matches);
+    mq.addEventListener('change', onChange);
+    return () => mq.removeEventListener('change', onChange);
+  }, []);
+
+  const workspaceClass = narrow ? `workspace tab-${tab}` : 'workspace';
+
   return (
     <div className="app">
       <PrintStyles />
       <Toolbar />
-      <div className="workspace">
+      {narrow && (
+        <div className="mobileTabs no-print">
+          <button className={tab === 'edit' ? 'mobileTabActive' : ''} onClick={() => setTab('edit')}>
+            ✎ Edit
+          </button>
+          <button className={tab === 'preview' ? 'mobileTabActive' : ''} onClick={() => setTab('preview')}>
+            👁 Preview
+          </button>
+        </div>
+      )}
+      <div className={workspaceClass}>
         <OutlinePanel />
         <Preview />
       </div>

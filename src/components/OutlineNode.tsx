@@ -160,34 +160,34 @@ export function OutlineNode({
           {effLocked ? '🔒' : '🔓'}
         </button>
 
-        <div className={styles.labelWrap}>
-          <button
-            type="button"
-            className={styles.typeTag}
-            onClick={selectAndReveal}
-            title="Scroll to this in the preview"
+        <button
+          type="button"
+          className={styles.typeTag}
+          onClick={selectAndReveal}
+          title="Scroll to this in the preview"
+        >
+          {TYPE_LABEL[node.type]}
+        </button>
+
+        {node.type === 'contactItem' && (
+          <select
+            className={styles.iconSelect}
+            value={node.props?.icon ?? 'none'}
+            aria-label="Contact icon"
+            disabled={effLocked}
+            onChange={(e) =>
+              dispatch({ kind: 'updateProp', id: node.id, key: 'icon', value: e.target.value as IconName })
+            }
           >
-            {TYPE_LABEL[node.type]}
-          </button>
+            {ICON_OPTIONS.map((o) => (
+              <option key={o.value} value={o.value}>
+                {o.label}
+              </option>
+            ))}
+          </select>
+        )}
 
-          {node.type === 'contactItem' && (
-            <select
-              className={styles.iconSelect}
-              value={node.props?.icon ?? 'none'}
-              aria-label="Contact icon"
-              disabled={effLocked}
-              onChange={(e) =>
-                dispatch({ kind: 'updateProp', id: node.id, key: 'icon', value: e.target.value as IconName })
-              }
-            >
-              {ICON_OPTIONS.map((o) => (
-                <option key={o.value} value={o.value}>
-                  {o.label}
-                </option>
-              ))}
-            </select>
-          )}
-
+        <div className={styles.editArea}>
           {node.type === 'subsection' ? (
             <span className={styles.subEdit}>
               <RichText
@@ -262,6 +262,7 @@ export function OutlineNode({
             </button>
           )}
         </div>
+        <i className={styles.rowBreak} aria-hidden="true" />
 
         {!globalLocked && (
         <span className={styles.actions}>

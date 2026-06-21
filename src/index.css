@@ -33,6 +33,41 @@ button {
 }
 
 /* ===========================================================================
+   Mobile: Edit / Preview tabs. Both panes stay mounted; CSS hides the inactive
+   one (screen only) so the active pane gets the full width and printing still
+   emits the resume.
+   =========================================================================== */
+.mobileTabs {
+  display: flex;
+  background: #1f2430;
+  border-bottom: 1px solid #11151d;
+}
+.mobileTabs button {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  background: transparent;
+  color: #aab2c2;
+  font-size: 14px;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+}
+.mobileTabs button.mobileTabActive {
+  color: #fff;
+  border-bottom-color: #4f7cff;
+}
+
+@media screen and (max-width: 1024px) {
+  /* OutlinePanel renders an <aside>; Preview renders the canvas <div> */
+  .workspace.tab-preview > aside {
+    display: none;
+  }
+  .workspace.tab-edit > div {
+    display: none;
+  }
+}
+
+/* ===========================================================================
    Print: show only the resume sheet. The toolbar (.no-print) and outline panel
    are removed; the workspace collapses so the page flows from the top-left.
    =========================================================================== */

@@ -16,12 +16,12 @@
   align-items: flex-start;
 }
 
-/* page-count badge (screen only) */
+/* page-count badge (screen only) — absolute so it never adds to the canvas
+   width (a flex sibling would push the sheet and force horizontal scroll) */
 .pageBadge {
-  position: sticky;
-  top: 0;
-  align-self: flex-start;
-  margin-right: -8px;
+  position: absolute;
+  top: 6px;
+  left: 6px;
   z-index: 5;
   font-size: 11px;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -36,13 +36,21 @@
   background: #c2693f;
 }
 
+/* reserves only the SCALED footprint of the sheet (width/height set inline);
+   the page inside is transform:scaled to fit, so the canvas never scrolls
+   horizontally and the grey margin is just the canvas padding */
+.scaler {
+  position: relative;
+  flex-shrink: 0;
+  /* clip the page's unscaled (794px) layout box that transform leaves behind,
+     so the canvas only sees the scaled footprint and never scrolls sideways */
+  overflow: hidden;
+}
+
 .page {
   position: relative;
   width: var(--page-w);
-  /* never let the flex canvas shrink the sheet below its real A4 width —
-     otherwise the content reflows narrower/taller and the page-count math
-     falsely reports an extra page when the window narrows (e.g. a sidebar). */
-  flex-shrink: 0;
+  transform-origin: top left;
   min-height: var(--page-min-h);
   padding: var(--page-margin);
   background: #fff;
@@ -299,6 +307,11 @@
     padding: 0;
     display: block;
   }
+  /* print at true size — undo the on-screen fit-to-width scale */
+  .scaler {
+    width: auto !important;
+    height: auto !important;
+  }
   .page {
     /* the injected @page rule provides the physical margin on EVERY page
        (incl. interior breaks), so drop the on-screen sheet's padding/width
@@ -307,6 +320,7 @@
     min-height: 0;
     width: auto;
     padding: 0;
+    transform: none !important;
   }
   .hidden,
   .whidden {
@@ -333,5 +347,12 @@
   .bullets {
     orphans: 2;
     widows: 2;
+  }
+}
+
+/* tighter grey margin on small screens (the sheet is scaled to fit width) */
+@media screen and (max-width: 1024px) {
+  .canvas {
+    padding: 10px;
   }
 }

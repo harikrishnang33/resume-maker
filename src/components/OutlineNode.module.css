@@ -49,6 +49,7 @@
 }
 
 .row {
+  position: relative;
   display: flex;
   align-items: flex-start;
   gap: 2px;
@@ -100,14 +101,14 @@
 }
 
 .twisty {
-  width: 22px;
-  height: 22px;
+  width: 24px;
+  height: 24px;
   margin-top: 1px;
   border: none;
   background: none;
   cursor: pointer;
   color: #4a5160;
-  font-size: 13px;
+  font-size: 15px;
   line-height: 1;
   padding: 0;
   border-radius: 4px;
@@ -117,7 +118,7 @@
   color: #1f2430;
 }
 .twistySpace {
-  width: 22px;
+  width: 24px;
   flex-shrink: 0;
 }
 
@@ -125,9 +126,13 @@
   border: none;
   background: none;
   cursor: pointer;
-  font-size: 12px;
-  padding: 0 2px;
+  font-size: 15px;
+  padding: 1px 3px;
+  border-radius: 4px;
   filter: grayscale(0.2);
+}
+.visBtn:hover {
+  background: #dde2ea;
 }
 
 /* per-node lock toggle */
@@ -135,9 +140,10 @@
   border: none;
   background: none;
   cursor: pointer;
-  font-size: 12px;
-  padding: 0 2px;
+  font-size: 15px;
+  padding: 1px 3px;
   margin-top: 1px;
+  border-radius: 4px;
   opacity: 0.5;
   filter: grayscale(0.4);
 }
@@ -153,13 +159,17 @@
   opacity: 0.85;
 }
 
-.labelWrap {
+/* holds just the editor(s); type-tag + icon are now separate row children */
+.editArea {
   flex: 1;
   min-width: 0;
   display: flex;
   align-items: flex-start;
-  gap: 6px;
   padding: 0 2px;
+}
+/* line-break helper: hidden on desktop, forces a wrap on mobile */
+.rowBreak {
+  display: none;
 }
 .typeTag {
   flex-shrink: 0;
@@ -225,11 +235,16 @@
 .iconSelect {
   flex-shrink: 0;
   margin-top: 1px;
-  font-size: 10px;
+  font-size: 11.5px;
+  color: #2a2f3a;
   border: 1px solid #c4cad4;
-  border-radius: 4px;
+  border-radius: 5px;
   background: #fff;
-  padding: 1px;
+  padding: 3px 6px;
+  cursor: pointer;
+}
+.iconSelect:hover {
+  border-color: #9db6f5;
 }
 
 /* static fallback label for structural containers */
@@ -247,26 +262,26 @@
   word-break: break-word;
 }
 
+/* hidden at rest (takes no space → editor stays full width); shown only on the
+   active/selected row — i.e. after you click into it. (Touch screens show them
+   in flow — see the mobile block below.) */
 .actions {
-  display: flex;
-  align-items: flex-start;
+  display: none;
+  align-items: center;
   gap: 0;
   flex-shrink: 0;
   margin-top: 1px;
-  opacity: 0;
-  transition: opacity 0.1s;
 }
-.row:hover .actions,
 .selected .actions {
-  opacity: 1;
+  display: flex;
 }
 .actions button {
-  width: 20px;
-  height: 20px;
+  width: 26px;
+  height: 26px;
   border: none;
   background: none;
   cursor: pointer;
-  font-size: 11px;
+  font-size: 14px;
   color: #5b6270;
   border-radius: 4px;
   padding: 0;
@@ -292,7 +307,7 @@
   z-index: 30;
   display: flex;
   flex-direction: column;
-  min-width: 120px;
+  min-width: 150px;
   background: #fff;
   border: 1px solid #d9dde4;
   border-radius: 8px;
@@ -306,10 +321,11 @@
   border: none;
   background: none;
   cursor: pointer;
-  font-size: 12px;
-  padding: 5px 8px;
+  font-size: 12.5px;
+  padding: 8px 12px;
   border-radius: 5px;
   color: #2a2f3a;
+  white-space: nowrap; /* keep "Sub-section" on one line */
 }
 .menu button:hover {
   background: #eef0f4;
@@ -327,4 +343,61 @@
 }
 .addSection:hover {
   background: #eef0f4;
+}
+
+/* ===========================================================================
+   Mobile: a tree row can't fit all its controls + editor on one line, so wrap
+   it — small controls on top, the editor on its own full-width line, and the
+   action buttons (shown on the selected row) on their own line.
+   =========================================================================== */
+@media (max-width: 1024px) {
+  .children {
+    margin-left: 8px;
+  }
+  .row {
+    flex-wrap: wrap;
+    row-gap: 6px;
+    align-items: center;
+  }
+  /* line 1: drag handle right beside the editor */
+  .drag {
+    order: 1;
+  }
+  .editArea {
+    order: 2;
+    flex: 1 1 0;
+  }
+  /* forces a wrap so everything below lands on its own line(s) */
+  .rowBreak {
+    display: block;
+    order: 3;
+    flex: 0 0 100%;
+    height: 0;
+  }
+  /* line 2: all the control buttons in one straight line */
+  .twisty {
+    order: 4;
+  }
+  .visBtn {
+    order: 5;
+  }
+  .lockBtn {
+    order: 6;
+  }
+  .typeTag {
+    order: 7;
+    margin-top: 0;
+  }
+  .iconSelect {
+    order: 8;
+  }
+  .actions {
+    order: 9;
+    gap: 3px;
+  }
+  .actions button {
+    width: 34px;
+    height: 30px;
+    font-size: 15px;
+  }
 }

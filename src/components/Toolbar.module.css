@@ -1,7 +1,7 @@
 .bar {
   display: flex;
   align-items: center;
-  gap: 18px;
+  gap: 10px 14px;
   flex-wrap: wrap;
   padding: 8px 16px;
   background: #1f2430;
@@ -25,17 +25,16 @@
 .group {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 8px;
 }
-
-.groupLabel {
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: #7c869c;
+/* primary actions sit on the right edge of the bar */
+.actionsGroup {
+  margin-left: auto;
 }
 
 .btn,
+.btnOn,
 .ghost,
 .primary {
   display: inline-flex;
@@ -54,6 +53,16 @@
 .btn:hover {
   background: #3a4256;
 }
+/* Layout button while its dropdown is open */
+.btnOn {
+  background: #3a4256;
+  color: #fff;
+  box-shadow: inset 0 0 0 1px #5b6a8c;
+}
+.caret {
+  font-size: 10px;
+  opacity: 0.75;
+}
 .ghost {
   background: transparent;
   color: #aab2c2;
@@ -70,24 +79,69 @@
   background: #3f6bef;
 }
 
-.field {
+/* ===========================================================================
+   Layout dropdown — all page / type / spacing controls, tucked away so the bar
+   stays tidy.
+   =========================================================================== */
+.layoutWrap {
+  position: relative;
+  display: inline-flex;
+}
+.menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 234px;
+  padding: 14px;
+  background: #272d3b;
+  border: 1px solid #3a4256;
+  border-radius: 10px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+}
+.menuSection {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+.menuHead {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #7c869c;
+}
+.menuField {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 12.5px;
+  color: #cbd2e0;
+}
+.inputUnit {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  font-size: 12px;
   color: #aab2c2;
 }
-.field select,
-.field input {
-  background: #2d3445;
+.menuField select,
+.menuField input {
+  background: #1f2430;
   color: #e8ebf2;
   border: 1px solid #3a4256;
   border-radius: 5px;
   padding: 4px 6px;
-  font-size: 12px;
+  font-size: 12.5px;
 }
-.field input {
-  width: 54px;
+.menuField input {
+  width: 66px;
+}
+.menuField select {
+  width: 88px;
 }
 
 /* Lock button — amber so it's clearly visible/distinct on the dark bar */
@@ -117,4 +171,36 @@
 }
 .lockBtnActive:hover {
   background: #d49b2c;
+}
+
+/* Compact the toolbar on small screens so it doesn't dominate the view. */
+@media (max-width: 1024px) {
+  .bar {
+    gap: 8px 10px;
+    padding: 6px 10px;
+  }
+  .brand {
+    font-size: 14px;
+  }
+  /* let the action buttons wrap naturally rather than clinging to the right */
+  .actionsGroup {
+    margin-left: 0;
+  }
+  .btn,
+  .btnOn,
+  .ghost,
+  .primary,
+  .lockBtn,
+  .lockBtnActive {
+    padding: 6px 10px;
+    font-size: 12.5px;
+  }
+  .menu {
+    /* anchor near the left edge of the viewport so it never overflows */
+    position: fixed;
+    left: 10px;
+    right: 10px;
+    top: auto;
+    min-width: 0;
+  }
 }
