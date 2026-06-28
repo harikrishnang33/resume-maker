@@ -64,7 +64,7 @@ const experience: ResumeNode = {
           'Designed a <b>SQL-backed queue</b> that feeds the multi-provider image/video generation pipeline, pacing high-throughput requests within each provider’s rate limits.',
         ),
         bullet(
-          'Built an <b>extensible multi-provider architecture</b> for image and video generation models, powering ad-creative generation for <b>73K users</b>, with chat-based generation agents (<b>Google ADK</b>) as a natural-language alternative to manual configuration.',
+          'Built an <b>extensible multi-provider architecture</b> for image and video generation models, powering ad-creative generation for <b>73K users</b>, with chat-based agents (<b>Google ADK</b>) as a natural-language alternative to manual configs.',
         ),
         bullet(
           'Introduced <b>multi-tenancy</b> to the backend using a tenant ID and async local storage to scope every request, enabling multiple clients to run on a single codebase with <b>isolated data.</b>',
@@ -165,7 +165,7 @@ const header: ResumeNode = {
       children: [
         { id: id('ci'), type: 'contactItem', visible: true, props: { icon: 'email' }, content: 'hari.krishnan.g.0303@gmail.com' },
         { id: id('ci'), type: 'contactItem', visible: true, props: { icon: 'phone' }, content: '+91 9446954376' },
-        { id: id('ci'), type: 'contactItem', visible: true, props: { icon: 'location' }, content: 'Karnataka' },
+        { id: id('ci'), type: 'contactItem', visible: false, props: { icon: 'location' }, content: 'Karnataka' },
       ],
     },
     {
@@ -175,6 +175,7 @@ const header: ResumeNode = {
       children: [
         { id: id('ci'), type: 'contactItem', visible: true, props: { icon: 'linkedin' }, content: 'harikrishnang33' },
         { id: id('ci'), type: 'contactItem', visible: true, props: { icon: 'github' }, content: 'harikrishnang33' },
+        { id: id('ci'), type: 'contactItem', visible: true, props: { icon: 'web' }, content: 'harikrishnang.dev' },
       ],
     },
     summary(
